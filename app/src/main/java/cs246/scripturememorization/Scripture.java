@@ -15,6 +15,10 @@ public class Scripture implements Parcelable{
     Date dateMemorized;
     Date lastReviewed;
     int percentCorrect;
+    int book_id;
+    int chapter_id;
+    int verse_id;
+
 
     public Scripture(Parcel in) {
         volume = in.readString();
@@ -31,6 +35,9 @@ public class Scripture implements Parcelable{
         dateMemorized = new Date(in.readString());
         lastReviewed = new Date(in.readString());
         percentCorrect = in.readInt();
+        book_id = in.readInt();
+        chapter_id = in.readInt();
+        verse_id = in.readInt();
     }
 
     public Scripture() {
@@ -43,6 +50,9 @@ public class Scripture implements Parcelable{
         dateMemorized = null;
         lastReviewed = null;
         percentCorrect = 0;
+        book_id = 67;
+        chapter_id = 1190;
+        verse_id = 31103;
     }
 
     public Scripture(String volume, String book, String chapter, String verse, String text) {
@@ -55,6 +65,9 @@ public class Scripture implements Parcelable{
         dateMemorized = null;
         lastReviewed = null;
         percentCorrect = 0;
+        book_id = 0;
+        chapter_id = 0;
+        verse_id = 0;
     }
 
     @Override
@@ -95,5 +108,8 @@ public class Scripture implements Parcelable{
         dest.writeString(dateMemorized.toString());
         dest.writeString(lastReviewed.toString());
         dest.writeInt(percentCorrect);
+        dest.writeInt(book_id);
+        dest.writeInt(chapter_id);
+        dest.writeInt(verse_id);
     }
 }
