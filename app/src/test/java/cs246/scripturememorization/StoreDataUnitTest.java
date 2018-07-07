@@ -27,6 +27,8 @@ public class StoreDataUnitTest {
         // - converts JSON to Java object
 
         // testScripture = readData();
+        // readData was removed in favor of using SharedPreferences
+        // see androidTest/.../SharedPrefsUnitTest
 
         Scripture testScripture = new Scripture();
 
@@ -35,39 +37,6 @@ public class StoreDataUnitTest {
         assertEquals("1", testScripture.chapter);
         assertEquals("1", testScripture.verse);
         assertEquals("I Nephi, having been born of goodly parents", testScripture.text);
-
-        //assertEquals(new Date(),);
-
-
-        //
-        /*
-        * volume
-        * book
-        * chapter
-        * verse
-        * text
-        * memorized
-        * firstMemorized
-        * lastReviewed
-        * percentCorrect
-        * */
-
-        /*
-        {
-        volume: "Book of Mormon",
-        book: "1 Nephi",
-        chapter: "1",
-        verse: "1",
-        text: "I Nephi, having been born of goodly parents",
-        memorized: false,
-        firstMemorized: "",
-        lastReviewed: "2018-06-12 20:00:00",
-        percentCorrect: 30
-        }
-
-
-         */
-
 
     }
 }
