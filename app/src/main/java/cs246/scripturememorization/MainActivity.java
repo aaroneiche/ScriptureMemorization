@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,10 +25,12 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements Main_RecyclerViewAdapter.ItemClickListener{
+public class MainActivity extends AppCompatActivity
+        implements Main_RecyclerViewAdapter.ItemClickListener {
     private Scripture scripture;
     private List<Scripture> scriptureList;
     private TextView scriptureReference;
@@ -58,6 +61,9 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rv.getContext(),
                 LinearLayoutManager.VERTICAL);
         rv.addItemDecoration(dividerItemDecoration);
+        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(scriptureAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(rv);
 
         _gson = new Gson();
 
