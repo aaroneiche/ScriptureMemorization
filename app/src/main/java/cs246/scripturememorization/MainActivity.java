@@ -1,5 +1,6 @@
 package cs246.scripturememorization;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,16 +9,12 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,19 +24,25 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements Main_RecyclerViewAdapter.ItemClickListener{
+/**
+ * Entry point of program, shows the current scripture and a list of scriptures to be worked on.
+ * Has a menu for interacting with the current scripture.
+ */
+public class MainActivity extends AppCompatActivity implements Main_RecyclerViewAdapter.ItemClickListener {
     private Scripture scripture;
     private List<Scripture> scriptureList;
     private TextView scriptureReference;
     private TextView scriptureText;
     private TextView scriptureLastReviewed;
     private TextView scriptureMemorized;
+    private TextView scripturePercent;
     private ImageView scriptureMemorizedSticker;
     private Main_RecyclerViewAdapter scriptureAdapter;
     private Gson _gson;
 
     private static final String TAG = "main_debug";
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         scriptureText = findViewById(R.id.text_ScriptureText);
         scriptureLastReviewed = findViewById(R.id.text_lastReviewed);
         scriptureMemorized = findViewById(R.id.text_memorized);
+        scripturePercent = findViewById(R.id.text_percent);
         scriptureMemorizedSticker = findViewById(R.id.image_Memorized);
         RecyclerView rv = findViewById(R.id.rv_scriptures);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -58,8 +62,15 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rv.getContext(),
                 LinearLayoutManager.VERTICAL);
         rv.addItemDecoration(dividerItemDecoration);
+        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(scriptureAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(rv);
 
         _gson = new Gson();
+
+        /*
+         * Retrieves stored data
+         */
 
         SharedPreferences pref = getApplicationContext().getSharedPreferences("myPref", Context.MODE_PRIVATE);
         int sCount = pref.getInt("Scripture_Count", 0);
@@ -74,43 +85,36 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
             scriptureAdapter.notifyDataSetChanged();
         }
 
-        //buttons for testing last reviewed and passed off
-        Button button = findViewById(R.id.button2);
-        button.setOnClickListener(new View.OnClickListener() {
+         /*
+         * adds a menu button that starts a pop-up menu when tapped.
+         */
+        final ImageView menu_button = findViewById(R.id.button_menu);
+        menu_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //create pop-up menu
+                PopupMenu pop = new PopupMenu(MainActivity.this, menu_button);
+                //Inflate the popup
+                pop.getMenuInflater().inflate(R.menu.main_menu, pop.getMenu());
 
-                if (scripture != null) {
-                    if (scripture.memorized) {
-                        scripture.memorized = false;
-                        scripture.dateMemorized = null;
+                //add on click listener
+                pop.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        menuItemSelected(item.getItemId());
+                        return true;
                     }
-                    else {
-                        scripture.memorized = true;
-                        scripture.lastReviewed = new Date();
-                        scripture.dateMemorized = new Date();
-                    }
-                    updateScriptureView();
-                    Log.d(TAG, "button pushed");
-                }
-            }
-        });
-
-        Button buttonNew = findViewById(R.id.button3);
-        buttonNew.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (scripture != null) {
-                    scripture.lastReviewed = new Date();
-                    updateScriptureView();
-                    Log.d(TAG, "button2 pushed");
-                }
+                });
+                pop.show();
             }
         });
         updateScriptureView();
     }
 
+    /**
+     * Sets up an onClick Listener for the items in the list that switches the current scripture
+     * with the one clicked.
+     */
     @Override
     public void onItemClick(View view, int position) {
         Scripture temp = scripture;
@@ -120,38 +124,52 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         updateScriptureView();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
-        menu.add(0, 0, 0, "Add a new Scripture to your list");
-        menu.add(0, 1, 1, "Remove Current Scripture from your list");
-        menu.add(0, 2, 2, "Recite Current Scripture");
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case 0:
+    /**
+     * Handles selections in the pop-up menu
+     */
+    private void menuItemSelected(int item) {
+        switch (item) {
+            case R.id.i0:
                 getScripture();
-                return true;
-            case 1:
+                break;
+            case R.id.i1:
                 removeScripture();
-                return true;
-            case 2:
+                break;
+            case R.id.i2:
                 reciteScripture();
+                break;
+            case R.id.i3:
+                //fill in the blank
+                fitb();
+                break;
+            case R.id.i4:
+                scripture.lastReviewed = new Date();
+                updateScriptureView();
+                break;
+            case R.id.i5:
+                scripture.lastReviewed = new Date();
+                scripture.dateMemorized = new Date();
+                scripture.percentCorrect = 100;
+                scripture.memorized = true;
+                updateScriptureView();
+                Toast.makeText(MainActivity.this, "Well done, you mastered this scripture!", Toast.LENGTH_LONG).show();
+                break;
             default:
-                return super.onOptionsItemSelected(item);
+                break;
         }
     }
 
+    /**
+     * starts an activity to fetch a new scripture
+     */
     private void getScripture() {
         Intent intent = new Intent(MainActivity.this, testActivity.class);
         startActivityForResult(intent, 0);
     }
 
+    /**
+     * reviews the current scripture
+     */
     private void removeScripture() {
         if (scripture == null) {
             Toast.makeText(MainActivity.this, "No scripture to remove", Toast.LENGTH_LONG).show();
@@ -168,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         }
     }
 
+    /**
+     * starts an activity to use recitation to practice a scripture
+     */
     private void reciteScripture() {
         if (scripture == null) {
             Toast.makeText(MainActivity.this, "Please add a scripture to recite", Toast.LENGTH_LONG).show();
@@ -178,31 +199,57 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         startActivityForResult(intent, 1);
     }
 
+    /**
+     * starts an activity to fill-in-the-blank to practice a scripture
+     */
+
+    private void fitb() {
+        if (scripture == null) {
+            Toast.makeText(MainActivity.this, "Please add a scripture to practice", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Intent intent = new Intent(MainActivity.this, FITBActivity.class);
+        intent.putExtra("Scripture", scripture);
+        startActivityForResult(intent, 2);
+    }
+
     /*
     Handles the returned data
      */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 0 && resultCode == RESULT_OK) {
-            Scripture s = data.getParcelableExtra("Scripture");
-            if (scripture == null) {
-                scripture = s;
-            } else {
-                scriptureList.add(0, scripture);
-                scriptureAdapter.notifyItemInserted(0);
-                scripture = s;
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case 0:
+                    Scripture s = data.getParcelableExtra("Scripture");
+                    if (scripture == null) {
+                        scripture = s;
+                    } else {
+                        scriptureList.add(0, scripture);
+                        scriptureAdapter.notifyItemInserted(0);
+                        scripture = s;
+                    }
+                    updateScriptureView();
+                    break;
+                case 1:
+                    scripture = data.getParcelableExtra("Scripture");
+                    updateScriptureView();
+                    break;
+                case 2:
+                    scripture = data.getParcelableExtra("Scripture");
+                    updateScriptureView();
+                    break;
+                default:
+                    break;
             }
-            updateScriptureView();
-        }
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            scripture = data.getParcelableExtra("Scripture");
-            updateScriptureView();
         } else {
             Log.e(TAG, "result code not okay");
         }
     }
 
-
+    /**
+     * Fills views with data from current scripture.
+     */
     private void updateScriptureView() {
         if (scripture == null) {
             scriptureReference.setText(getString(R.string.main_ScriptureDefaultText));
@@ -210,11 +257,14 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
             scriptureLastReviewed.setVisibility(View.INVISIBLE);
             scriptureMemorized.setVisibility(View.INVISIBLE);
             scriptureMemorizedSticker.setVisibility(View.INVISIBLE);
+            scripturePercent.setVisibility(View.INVISIBLE);
         }
         else {
             scriptureReference.setText(sfHelper.getReference(scripture));
             scriptureText.setVisibility(View.VISIBLE);
             scriptureText.setText(scripture.text);
+            scripturePercent.setVisibility(View.VISIBLE);
+            scripturePercent.setText(sfHelper.getPercent(scripture));
             if (scripture.lastReviewed != null) {
                 scriptureLastReviewed.setVisibility(View.VISIBLE);
                 scriptureLastReviewed.setText(sfHelper.getDateReviewed(scripture.lastReviewed));
@@ -238,6 +288,9 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         }
     }
 
+    /**
+     * saves data for next time.
+     */
     @Override
     protected void onStop() {
         super.onStop();

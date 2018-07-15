@@ -2,60 +2,66 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="48dp">
 
-    <TableLayout
+    <ImageView
+        android:id="@+id/image_checkBox"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:scaleType="center"
+        app:srcCompat="@drawable/check_small" />
 
-        <TableRow
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_reference"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:text="TextView"
+            app:fontFamily="sans-serif" />
 
-            <ImageView
-                android:id="@+id/image_star"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:srcCompat="@drawable/check_small" />
-
-            <TextView
-                android:id="@+id/text_reference"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="2dp"
-                android:layout_marginTop="2dp"
-                android:text="TextView"
-                app:fontFamily="sans-serif" />
-        </TableRow>
-
-        <TableRow
+        <TextView
+            android:id="@+id/text_scripture"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:text="TextView"
+            android:textSize="12sp"
+            app:fontFamily="sans-serif-condensed" />
 
-            <ImageView
-                android:id="@+id/image_star2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"
-                app:srcCompat="@drawable/check_small" />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/text_scripture"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="16dp"
-                android:text="TextView"
-                android:textSize="12sp"
-                app:fontFamily="sans-serif-condensed" />
-        </TableRow>
+    <TextView
+        android:id="@+id/text_percent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:paddingBottom="2dp"
+        android:paddingTop="8dp"
+        android:text="TextView"
+        android:textSize="14sp"
+        android:typeface="sans"
+        app:fontFamily="sans-serif-condensed" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <ImageView
+        android:id="@+id/image_handle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:scaleType="center"
+        app:srcCompat="@drawable/drag" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </TableLayout>
 </LinearLayout>

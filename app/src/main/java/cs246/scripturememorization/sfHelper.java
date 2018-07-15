@@ -1,7 +1,9 @@
 package cs246.scripturememorization;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -28,6 +30,15 @@ public class sfHelper {
         return String.format("Memorized : %s", getDate(d));
     }
 
+    public static String getPercent(Scripture s) {
+        String sReturn;
+        sReturn = (s.percentCorrect < 10) ? " " : "";
+        sReturn += (s.percentCorrect < 100) ? " " : "";
+        sReturn += s.percentCorrect;
+        sReturn += "%";
+        return sReturn;
+    }
+
     public static String getDate(Date d) {
         SimpleDateFormat localDateFormat = new SimpleDateFormat("HH");
         boolean pm = false;
@@ -47,6 +58,25 @@ public class sfHelper {
                 d.getDate(),
                 d.getYear() + 1900,
                 time);
+    }
+
+    public static List<String> textToList(String text) {
+        ArrayList<String> array = new ArrayList<>();
+        boolean finished = false;
+        while (!finished)
+        {
+            int end = text.indexOf(" ");
+            if (end == -1) {
+                end = text.length() - 1;
+                finished = true;
+            }
+            String sub = text.substring(0, end + 1);
+            array.add(sub);
+            if (!finished) {
+                text = text.substring(end + 1, text.length());
+            }
+        }
+        return array;
     }
 
     private static String getMonth(int month)
