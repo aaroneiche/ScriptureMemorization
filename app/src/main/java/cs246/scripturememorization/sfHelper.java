@@ -28,6 +28,15 @@ public class sfHelper {
         return String.format("Memorized : %s", getDate(d));
     }
 
+    public static String getPercent(Scripture s) {
+        String sReturn;
+        sReturn = (s.percentCorrect < 10) ? " " : "";
+        sReturn += (s.percentCorrect < 100) ? " " : "";
+        sReturn += s.percentCorrect;
+        sReturn += "%";
+        return sReturn;
+    }
+
     public static String getDate(Date d) {
         SimpleDateFormat localDateFormat = new SimpleDateFormat("HH");
         boolean pm = false;

@@ -3,4 +3,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/i0"
+        android:title="Add a New Scripture" />
+    <item
+        android:id="@+id/i1"
+        android:title="Remove Current Scripture from your list" />
+    <item
+        android:id="@+id/i2"
+        android:title="Recite Current Scripture" />
+    <item
+        android:id="@+id/i3"
+        android:title="Fill In The Blank" />
+    <item
+        android:id="@+id/i4"
+        android:title="Mark Scripture has reviewed" />
+    <item
+        android:id="@+id/i5"
+        android:title="Mark Scripture as Mastered" />
 </menu>
