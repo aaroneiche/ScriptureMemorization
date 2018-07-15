@@ -5,4 +5,7 @@
     <string name="main_ScriptureDefaultText">No scripture selected please add a scripture</string>
     <string name="heardStaticContent">What we heard:</string>
     <string name="saveAndReturn">Save score and Return</string>
+    <string name="fitb_title">Fill In The Blank</string>
+    <string name="fitb_menu">How well do you know this scripture?</string>
+    <string name="fitb_endMessage">Congratulations! You have mastered this scripture!</string>
 </resources>

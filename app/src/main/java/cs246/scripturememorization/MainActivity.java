@@ -11,16 +11,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +21,6 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -148,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
                 break;
             case R.id.i3:
                 //fill in the blank
+                fitb();
                 break;
             case R.id.i4:
                 scripture.lastReviewed = new Date();
@@ -215,30 +208,40 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
             Toast.makeText(MainActivity.this, "Please add a scripture to practice", Toast.LENGTH_LONG).show();
             return;
         }
-        //Intent intent = new Intent(MainActivity.this, FITBActivity.class);
-        //intent.putExtra("Scripture", scripture);
-        //startActivityForResult(intent, 2);
+        Intent intent = new Intent(MainActivity.this, FITBActivity.class);
+        intent.putExtra("Scripture", scripture);
+        startActivityForResult(intent, 2);
     }
 
-    /**
-    Handles the returned data from the different activities
+    /*
+    Handles the returned data
      */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 0 && resultCode == RESULT_OK) {
-            Scripture s = data.getParcelableExtra("Scripture");
-            if (scripture == null) {
-                scripture = s;
-            } else {
-                scriptureList.add(0, scripture);
-                scriptureAdapter.notifyItemInserted(0);
-                scripture = s;
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case 0:
+                    Scripture s = data.getParcelableExtra("Scripture");
+                    if (scripture == null) {
+                        scripture = s;
+                    } else {
+                        scriptureList.add(0, scripture);
+                        scriptureAdapter.notifyItemInserted(0);
+                        scripture = s;
+                    }
+                    updateScriptureView();
+                    break;
+                case 1:
+                    scripture = data.getParcelableExtra("Scripture");
+                    updateScriptureView();
+                    break;
+                case 2:
+                    scripture = data.getParcelableExtra("Scripture");
+                    updateScriptureView();
+                    break;
+                default:
+                    break;
             }
-            updateScriptureView();
-        }
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            scripture = data.getParcelableExtra("Scripture");
-            updateScriptureView();
         } else {
             Log.e(TAG, "result code not okay");
         }
