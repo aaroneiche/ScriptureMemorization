@@ -1,7 +1,9 @@
 package cs246.scripturememorization;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,6 +75,13 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
             percent = itemView.findViewById(R.id.text_percent);
             check = itemView.findViewById(R.id.image_checkBox);
             itemView.setOnClickListener(this);
+            ImageView drag = itemView.findViewById(R.id.image_handle);
+            drag.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.performLongClick();
+                }
+            });
         }
 
         @Override

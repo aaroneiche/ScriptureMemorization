@@ -51,5 +51,4 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
         Log.d("adapter", "Swipe");
         _adapter.onItemDismiss(viewHolder.getAdapterPosition());
     }
-
 }
