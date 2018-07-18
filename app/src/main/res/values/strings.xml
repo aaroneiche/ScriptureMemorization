@@ -8,4 +8,10 @@
     <string name="fitb_title">Fill In The Blank</string>
     <string name="fitb_menu">How well do you know this scripture?</string>
     <string name="fitb_endMessage">Congratulations! You have mastered this scripture!</string>
+    <string name="main_menu_add">Add a New Scripture</string>
+    <string name="main_menu_remove">Remove Current Scripture</string>
+    <string name="main_menu_recite">Recite Current Scripture</string>
+    <string name="main_menu_fitb">Fill In The Blank</string>
+    <string name="main_menu_reviewed">Mark Scripture as Reviewed</string>
+    <string name="main_menu_mastered">Mark Scripture as Mastered</string>
 </resources>

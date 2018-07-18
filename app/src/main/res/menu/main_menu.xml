@@ -5,20 +5,20 @@
 
     <item
         android:id="@+id/i0"
-        android:title="Add a New Scripture" />
+        android:title= "@string/main_menu_add" />
     <item
         android:id="@+id/i1"
-        android:title="Remove Current Scripture from your list" />
+        android:title="@string/main_menu_remove" />
     <item
         android:id="@+id/i2"
-        android:title="Recite Current Scripture" />
+        android:title="@string/main_menu_recite" />
     <item
         android:id="@+id/i3"
-        android:title="Fill In The Blank" />
+        android:title="@string/main_menu_fitb" />
     <item
         android:id="@+id/i4"
-        android:title="Mark Scripture has reviewed" />
+        android:title="@string/main_menu_reviewed" />
     <item
         android:id="@+id/i5"
-        android:title="Mark Scripture as Mastered" />
+        android:title="@string/main_menu_mastered" />
 </menu>
