@@ -28,8 +28,10 @@ import java.util.List;
 /**
  * Entry point of program, shows the current scripture and a list of scriptures to be worked on.
  * Has a menu for interacting with the current scripture.
+ * Implements item click listener so that we can click on items in the recycler view
+ * Implements OnStartDragListener so that we can drag around items in the recycler view
  */
-public class MainActivity extends AppCompatActivity implements Main_RecyclerViewAdapter.ItemClickListener {
+public class MainActivity extends AppCompatActivity implements Main_RecyclerViewAdapter.ItemClickListener, OnStartDragListener {
     private Scripture scripture;
     private List<Scripture> scriptureList;
     private TextView scriptureReference;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
     private ImageView scriptureMemorizedSticker;
     private Main_RecyclerViewAdapter scriptureAdapter;
     private Gson _gson;
+    private ItemTouchHelper _itemTouchHelper;
 
     private static final String TAG = "main_debug";
 
@@ -55,17 +58,24 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         scriptureMemorized = findViewById(R.id.text_memorized);
         scripturePercent = findViewById(R.id.text_percent);
         scriptureMemorizedSticker = findViewById(R.id.image_Memorized);
+        /*
+        Recycler view set up
+        1. find the view and set layout
+        2. build and set adapter
+        3. add a decoration
+        4. add touch event handling to the adapter
+         */
         RecyclerView rv = findViewById(R.id.rv_scriptures);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        scriptureAdapter = new Main_RecyclerViewAdapter(this, scriptureList);
+        scriptureAdapter = new Main_RecyclerViewAdapter(this, this, scriptureList);
         scriptureAdapter.setClickListener(this);
         rv.setAdapter(scriptureAdapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rv.getContext(),
                 LinearLayoutManager.VERTICAL);
         rv.addItemDecoration(dividerItemDecoration);
         ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(scriptureAdapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(rv);
+        _itemTouchHelper = new ItemTouchHelper(callback);
+        _itemTouchHelper.attachToRecyclerView(rv);
 
         _gson = new Gson();
 
@@ -331,5 +341,10 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         } else
             editor.putInt("Scripture_Count", 0);
         editor.apply();
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        _itemTouchHelper.startDrag(viewHolder);
     }
 }

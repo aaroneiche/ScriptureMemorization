@@ -1,11 +1,11 @@
 package cs246.scripturememorization;
 
-import android.content.ClipData;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -24,12 +24,13 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
     private List<Scripture> _scriptures;
     private LayoutInflater _inflater;
     private ItemClickListener _listener;
+    private final OnStartDragListener _DragListenter;
     private static final String TAG = "main_RVA";
 
-    Main_RecyclerViewAdapter(Context context, List<Scripture> scriptures) {
+    Main_RecyclerViewAdapter(Context context, OnStartDragListener dragListener, List<Scripture> scriptures) {
         _scriptures = scriptures;
+        _DragListenter = dragListener;
         _inflater = LayoutInflater.from(context);
-
     }
 
     // inflates the row layout from xml when needed
@@ -39,8 +40,9 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
         return new ViewHolder(view);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         String reference = sfHelper.getReference(_scriptures.get(position));
         holder.reference.setText(reference);
         reference = sfHelper.getTextShort(_scriptures.get(position));
@@ -52,6 +54,15 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
         else {
             holder.check.setImageResource(R.drawable.box_small);;
         }
+        holder.handle.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    _DragListenter.onStartDrag(holder);
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -67,6 +78,7 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
         TextView tag;
         TextView percent;
         ImageView check;
+        ImageView handle;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -75,13 +87,7 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
             percent = itemView.findViewById(R.id.text_percent);
             check = itemView.findViewById(R.id.image_checkBox);
             itemView.setOnClickListener(this);
-            ImageView drag = itemView.findViewById(R.id.image_handle);
-            drag.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    v.performLongClick();
-                }
-            });
+            handle = itemView.findViewById(R.id.image_handle);
         }
 
         @Override
