@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -108,6 +109,30 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
                 pop.show();
             }
         });
+
+        ImageView help_button = findViewById(R.id.button_help);
+        final ImageView help_image = findViewById(R.id.image_help);
+        help_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                help_image.setVisibility(View.VISIBLE);
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        // Actions to do after 10 seconds
+                        help_image.setVisibility(View.INVISIBLE);
+                    }
+                }, 8000);
+            }
+        });
+
+        help_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                help_image.setVisibility(View.INVISIBLE);
+            }
+        });
+
         updateScriptureView();
     }
 
