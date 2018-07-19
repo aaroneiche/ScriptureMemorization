@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,17 +43,22 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
     private TextView scriptureMemorized;
     private TextView scripturePercent;
     private ImageView scriptureMemorizedSticker;
+    private OnViewGlobalLayoutListener scrollListener;
     private Main_RecyclerViewAdapter scriptureAdapter;
-    private Gson _gson;
-    private ItemTouchHelper _itemTouchHelper;
+    private Gson gson;
+    private ItemTouchHelper itemTouchHelper;
 
     private static final String TAG = "main_debug";
+    private static final int MAX_SCRIPTURE_HEIGHT = 700;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        /*
+        Find frequently updated views
+         */
         scriptureList = new ArrayList<>();
         scriptureReference = findViewById(R.id.text_scriptureName);
         scriptureText = findViewById(R.id.text_ScriptureText);
@@ -59,11 +67,13 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         scripturePercent = findViewById(R.id.text_percent);
         scriptureMemorizedSticker = findViewById(R.id.image_Memorized);
         /*
-        Recycler view set up
-        1. find the view and set layout
-        2. build and set adapter
-        3. add a decoration
-        4. add touch event handling to the adapter
+        Set up scrollView holding the scripture text with max height.
+         */
+        ScrollView scrollView = findViewById(R.id.scrollView);
+        scrollListener = new OnViewGlobalLayoutListener(scrollView, MAX_SCRIPTURE_HEIGHT);
+        scrollView.getViewTreeObserver().addOnGlobalLayoutListener(scrollListener);
+        /*
+        Recycler view set up and add touch listeners
          */
         RecyclerView rv = findViewById(R.id.rv_scriptures);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -74,22 +84,19 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
                 LinearLayoutManager.VERTICAL);
         rv.addItemDecoration(dividerItemDecoration);
         ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(scriptureAdapter);
-        _itemTouchHelper = new ItemTouchHelper(callback);
-        _itemTouchHelper.attachToRecyclerView(rv);
-
-        _gson = new Gson();
-
+        itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(rv);
         /*
-         * Retrieves stored data
+         Retrieves stored data
          */
-
+        gson = new Gson();
         SharedPreferences pref = getApplicationContext().getSharedPreferences("myPref", Context.MODE_PRIVATE);
         int sCount = pref.getInt("Scripture_Count", 0);
         if (sCount > 0)
-            scripture = _gson.fromJson(pref.getString("s_" + 0, null ), Scripture.class);
+            scripture = gson.fromJson(pref.getString("s_" + 0, null ), Scripture.class);
         for (int i = 1; i < sCount; i++)
         {
-            Scripture s = _gson.fromJson(pref.getString("s_" + i, null ), Scripture.class);
+            Scripture s = gson.fromJson(pref.getString("s_" + i, null ), Scripture.class);
             if (s != null) {
                 scriptureList.add(s);
             }
@@ -97,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         }
 
          /*
-         * adds a menu button that starts a pop-up menu when tapped.
+         adds a menu button that starts a pop-up menu when tapped.
          */
         final ImageView menu_button = findViewById(R.id.button_menu);
         menu_button.setOnClickListener(new View.OnClickListener() {
@@ -300,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
             scriptureText.setText(scripture.text);
             scripturePercent.setVisibility(View.VISIBLE);
             scripturePercent.setText(sfHelper.getPercent(scripture));
+            scrollListener.update();
             if (scripture.lastReviewed != null) {
                 scriptureLastReviewed.setVisibility(View.VISIBLE);
                 scriptureLastReviewed.setText(sfHelper.getDateReviewed(scripture.lastReviewed));
@@ -334,17 +342,23 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         editor.clear();
         if (scripture != null) {
             editor.putInt("Scripture_Count", 1 + scriptureList.size());
-            editor.putString("s_0", _gson.toJson(scripture));
+            editor.putString("s_0", gson.toJson(scripture));
             for (int i = 0; i < scriptureList.size(); i++) {
-                editor.putString("s_" + (i + 1), _gson.toJson(scriptureList.get(i)));
+                editor.putString("s_" + (i + 1), gson.toJson(scriptureList.get(i)));
             }
         } else
             editor.putInt("Scripture_Count", 0);
         editor.apply();
     }
 
+    /**
+     * Starts a drag, signals ItemTouchHelperCallback to flag a drag, which calls
+     * Main_RecyclerViewAdapter onItemMove()
+     * @param viewHolder The holder of the view to drag.
+     */
+
     @Override
     public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
-        _itemTouchHelper.startDrag(viewHolder);
+        itemTouchHelper.startDrag(viewHolder);
     }
 }
