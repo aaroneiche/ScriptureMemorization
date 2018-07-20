@@ -1,6 +1,5 @@
 package cs246.scripturememorization;
 
-import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,11 +42,5 @@ public class OnViewGlobalLayoutListener implements ViewTreeObserver.OnGlobalLayo
 
     public void update() {
         change = true;
-    }
-
-    public static int getHeight() {
-        int h = Resources.getSystem().getDisplayMetrics().heightPixels;
-        int w = Resources.getSystem().getDisplayMetrics().widthPixels;
-        return (h > w ? w : h);
     }
 }

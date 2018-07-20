@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,9 +25,11 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Entry point of program, shows the current scripture and a list of scriptures to be worked on.
@@ -205,6 +210,9 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
                 updateScriptureView();
                 Toast.makeText(MainActivity.this, "Well done, you mastered this scripture!", Toast.LENGTH_LONG).show();
                 break;
+            case R.id.i6:
+                getRandomScripture();
+                break;
             default:
                 break;
         }
@@ -262,6 +270,20 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         Intent intent = new Intent(MainActivity.this, FITBActivity.class);
         intent.putExtra("Scripture", mScripture);
         startActivityForResult(intent, 2);
+    }
+
+    private void getRandomScripture() {
+        Random random = new Random();
+        int randomInt = random.nextInt(41996);
+        Scripture s = getScriptureByID(randomInt);
+        if (mScripture == null) {
+            mScripture = s;
+        } else {
+            mScriptureList.add(0, mScripture);
+            mScriptureAdapter.notifyItemInserted(0);
+            mScripture = s;
+        }
+        updateScriptureView();
     }
 
     /*
@@ -369,5 +391,45 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
     @Override
     public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
         mItemTouchHelper.startDrag(viewHolder);
+    }
+
+    Scripture getScriptureByID(int id) {
+        DatabaseHelper mDBHelper = new DatabaseHelper(this);
+        SQLiteDatabase mDb;
+        try {
+            mDBHelper.updateDataBase();
+        } catch (IOException mIOException) {
+            throw new Error("UnableToUpdateDatabase");
+        }
+
+        try {
+            mDb = mDBHelper.getWritableDatabase();
+        } catch (SQLException mSQLException) {
+            throw mSQLException;
+        }
+
+        Cursor scriptureCursor = mDb.rawQuery("SELECT * FROM scriptures WHERE verse_id = " + id, null);
+
+        if (scriptureCursor== null) {
+            Log.d(TAG, "view not found");
+        }
+        else {
+            Log.d(TAG, "view found");
+        }
+
+        scriptureCursor.moveToFirst();
+
+        Log.d(TAG, scriptureCursor.getString(scriptureCursor.getColumnIndex("volume_title")));
+
+        Scripture returnScripture = new Scripture (
+                scriptureCursor.getString(scriptureCursor.getColumnIndex("volume_title")),
+                scriptureCursor.getString(scriptureCursor.getColumnIndex("book_title")),
+                scriptureCursor.getInt(scriptureCursor.getColumnIndex("chapter_number")),
+                scriptureCursor.getInt(scriptureCursor.getColumnIndex("verse_number")),
+                id,
+                scriptureCursor.getString(scriptureCursor.getColumnIndex("scripture_text")));
+        scriptureCursor.close();
+
+        return returnScripture;
     }
 }

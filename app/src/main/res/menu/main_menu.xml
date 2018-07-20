@@ -7,6 +7,9 @@
         android:id="@+id/i0"
         android:title= "@string/main_menu_add" />
     <item
+        android:id ="@+id/i6"
+        android:title="@string/main_menu_random" />
+    <item
         android:id="@+id/i1"
         android:title="@string/main_menu_remove" />
     <item

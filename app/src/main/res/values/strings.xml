@@ -14,4 +14,5 @@
     <string name="main_menu_fitb">Fill In The Blank</string>
     <string name="main_menu_reviewed">Mark Scripture as Reviewed</string>
     <string name="main_menu_mastered">Mark Scripture as Mastered</string>
+    <string name="main_menu_random">Add a Random Scripture</string>
 </resources>
