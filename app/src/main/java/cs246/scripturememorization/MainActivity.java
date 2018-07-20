@@ -1,6 +1,7 @@
 package cs246.scripturememorization;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -48,8 +49,9 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
     private ImageView mScriptureMemorizedSticker;
     private OnViewGlobalLayoutListener mScrollListener;
     private Main_RecyclerViewAdapter mScriptureAdapter;
-    private Gson mGson;
     private ItemTouchHelper mItemTouchHelper;
+    DatabaseHelper mDBHelper;
+    SQLiteDatabase mDb;
 
     private static final String TAG = "main_debug";
     private static final int MAX_SCRIPTURE_HEIGHT = 700;
@@ -92,20 +94,20 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         /*
          Retrieves stored data
          */
-        mGson = new Gson();
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("myPref", Context.MODE_PRIVATE);
-        int sCount = pref.getInt("Scripture_Count", 0);
-        if (sCount > 0)
-            mScripture = mGson.fromJson(pref.getString("s_" + 0, null ), Scripture.class);
-        for (int i = 1; i < sCount; i++)
-        {
-            Scripture s = mGson.fromJson(pref.getString("s_" + i, null ), Scripture.class);
-            if (s != null) {
-                mScriptureList.add(s);
-            }
-            mScriptureAdapter.notifyDataSetChanged();
+        mDBHelper = new DatabaseHelper(this);
+        try {
+            mDBHelper.updateDataBase();
+        } catch (IOException mIOException) {
+            throw new Error("UnableToUpdateDatabase");
         }
 
+        try {
+            mDb = mDBHelper.getWritableDatabase();
+        } catch (SQLException mSQLException) {
+            throw mSQLException;
+        }
+
+        getScripturesFromDatabase();
          /*
          adds a menu button that starts a pop-up menu when tapped.
          */
@@ -195,8 +197,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
                 reciteScripture();
                 break;
             case R.id.i3:
-                //fill in the blank
-                fitb();
+                fitb();                 //fill in the blank
                 break;
             case R.id.i4:
                 mScripture.lastReviewed = new Date();
@@ -315,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
                 default:
                     break;
             }
+            saveData();
         } else {
             Log.e(TAG, "result code not okay");
         }
@@ -360,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
                 mScriptureMemorizedSticker.setImageResource(R.drawable.box);
             }
         }
+        saveData();
     }
 
     /**
@@ -368,54 +371,84 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
     @Override
     protected void onStop() {
         super.onStop();
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("myPref", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.clear();
-        if (mScripture != null) {
-            editor.putInt("Scripture_Count", 1 + mScriptureList.size());
-            editor.putString("s_0", mGson.toJson(mScripture));
-            for (int i = 0; i < mScriptureList.size(); i++) {
-                editor.putString("s_" + (i + 1), mGson.toJson(mScriptureList.get(i)));
-            }
-        } else
-            editor.putInt("Scripture_Count", 0);
-        editor.apply();
+        saveData();
     }
 
-    /**
-     * Starts a drag, signals ItemTouchHelperCallback to flag a drag, which calls
-     * Main_RecyclerViewAdapter onItemMove()
-     * @param viewHolder The holder of the view to drag.
-     */
+    void saveData() {
+        mDb.execSQL("CREATE TABLE IF NOT EXISTS user_data (" +
+                "_id INTEGER, verseID INTEGER, lastReviewed TEXT, dateMemorized TEXT, percentCorrect INTEGER, PRIMARY KEY (_id))");
+        mDb.delete("user_data", null, null);
+        if (mScripture != null) {
+            writeScripture(mScripture, 0);
+        }
+        for (int i = 0; i < mScriptureList.size(); i++) {
+            writeScripture(mScriptureList.get(i), i + 1);
+        }
+    }
 
-    @Override
-    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
-        mItemTouchHelper.startDrag(viewHolder);
+    void writeScripture(Scripture s, int id) {
+        ContentValues values = new ContentValues();
+        if (s != null) {
+            values.put("_id", id);
+            values.put("verseID", s.verseID);
+            if (s.lastReviewed != null) {
+                values.put("lastReviewed", s.lastReviewed.toString());
+            }
+            else {
+                values.put("lastReviewed", "null");
+            }
+            if (s.memorized) {
+                values.put("dateMemorized", s.dateMemorized.toString());
+            }
+            else {
+                values.put("dateMemorized", "null");
+            }
+            values.put("percentCorrect", s.percentCorrect);
+        }
+
+        mDb.insert("user_data", null, values);
+    }
+
+    void getScripturesFromDatabase() {
+        Cursor userData = mDb.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '"+ "user_data" +"'", null);
+        if (userData != null) {
+            if (userData.getCount() > 0) {
+                //if table exists, read data
+                for (int i = 0; ; i++) {
+                    userData = mDb.rawQuery("SELECT * FROM user_data WHERE _id = " + i, null);
+                    userData.moveToFirst();
+                    Log.d(TAG, "userData size: " + userData.getCount());
+                    if (userData.getCount() == 0) {
+                        break;
+                    }
+                    int verse_id = userData.getInt(userData.getColumnIndex("verseID"));
+                    String dateMemorized = userData.getString(userData.getColumnIndex("dateMemorized"));
+                    String dateReviewed = userData.getString(userData.getColumnIndex("lastReviewed"));
+                    int percentCorrect = userData.getInt(userData.getColumnIndex("percentCorrect"));
+
+                    Scripture s = getScriptureByID(verse_id);
+                    if (!dateReviewed.equalsIgnoreCase("null")) {
+                        s.lastReviewed = new Date(dateReviewed);
+                    }
+                    if (!dateMemorized.equalsIgnoreCase("null")) {
+                        s.dateMemorized = new Date(dateMemorized);
+                        s.memorized = true;
+                    }
+                    if (i == 0) {
+                        mScripture = s;
+                    } else {
+                        mScriptureList.add(s);
+                    }
+                    s.percentCorrect = percentCorrect;
+                }
+                mScriptureAdapter.notifyDataSetChanged();
+            }
+            userData.close();
+        }
     }
 
     Scripture getScriptureByID(int id) {
-        DatabaseHelper mDBHelper = new DatabaseHelper(this);
-        SQLiteDatabase mDb;
-        try {
-            mDBHelper.updateDataBase();
-        } catch (IOException mIOException) {
-            throw new Error("UnableToUpdateDatabase");
-        }
-
-        try {
-            mDb = mDBHelper.getWritableDatabase();
-        } catch (SQLException mSQLException) {
-            throw mSQLException;
-        }
-
         Cursor scriptureCursor = mDb.rawQuery("SELECT * FROM scriptures WHERE verse_id = " + id, null);
-
-        if (scriptureCursor== null) {
-            Log.d(TAG, "view not found");
-        }
-        else {
-            Log.d(TAG, "view found");
-        }
 
         scriptureCursor.moveToFirst();
 
@@ -431,5 +464,17 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         scriptureCursor.close();
 
         return returnScripture;
+    }
+
+
+    /**
+     * Starts a drag, signals ItemTouchHelperCallback to flag a drag, which calls
+     * Main_RecyclerViewAdapter onItemMove()
+     * @param viewHolder The holder of the view to drag.
+     */
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
     }
 }
