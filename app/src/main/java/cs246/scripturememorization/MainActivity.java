@@ -108,6 +108,16 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
                 pop.show();
             }
         });
+        //updateScriptureView();
+        Intent intent = getIntent();
+        Scripture sc = intent.getParcelableExtra("Scripture");
+        if (scripture == null) {
+            scripture = sc;
+        } else {
+            scriptureList.add(0, scripture);
+            scriptureAdapter.notifyItemInserted(0);
+            scripture = sc;
+        }
         updateScriptureView();
     }
 
@@ -163,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
      * starts an activity to fetch a new scripture
      */
     private void getScripture() {
-        Intent intent = new Intent(MainActivity.this, testActivity.class);
+        Intent intent = new Intent(MainActivity.this, GetVolume.class);
         startActivityForResult(intent, 0);
     }
 
