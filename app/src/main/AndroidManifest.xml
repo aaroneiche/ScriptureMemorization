@@ -27,6 +27,10 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+        <activity android:name=".GetVolume"></activity>
+        <activity android:name=".GetBook"></activity>
+        <activity android:name=".GetChapter"></activity>
+        <activity android:name=".GetVerse"></activity>
     </application>
 
 </manifest>
