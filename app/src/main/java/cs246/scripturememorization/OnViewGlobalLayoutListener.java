@@ -14,28 +14,28 @@ import android.view.ViewTreeObserver;
  */
 
 public class OnViewGlobalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener{
-    private int maxHeight;
-    private View view;
+    private int mMaxHeight;
+    private View mView;
     private boolean change = false;
     private final String TAG = "GlobalListener";
 
     public OnViewGlobalLayoutListener(View view, int height) {
-        maxHeight = height;
-        this.view = view;
+        mMaxHeight = height;
+        mView = view;
     }
 
     @Override
     public void onGlobalLayout() {
         if (change) {
             change = false;
-            ViewGroup.LayoutParams params = view.getLayoutParams();
+            ViewGroup.LayoutParams params = mView.getLayoutParams();
             params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            view.setLayoutParams(params);
-            Log.d(TAG, "ViewHeight: " + view.getHeight());
-            if (view.getHeight() > maxHeight) {
-                params = view.getLayoutParams();
-                params.height = maxHeight;
-                view.setLayoutParams(params);
+            mView.setLayoutParams(params);
+            Log.d(TAG, "ViewHeight: " + mView.getHeight());
+            if (mView.getHeight() > mMaxHeight) {
+                params = mView.getLayoutParams();
+                params.height = mMaxHeight;
+                mView.setLayoutParams(params);
                 Log.d(TAG, "Height: " + params.height);
             }
         }

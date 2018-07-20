@@ -15,10 +15,10 @@ import android.util.Log;
  */
 
 public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
-    private final ItemTouchHelperAdapter _adapter;
+    private final ItemTouchHelperAdapter mAdapter;
 
     public ItemTouchHelperCallback(ItemTouchHelperAdapter adapter) {
-        _adapter = adapter;
+        mAdapter = adapter;
     }
 
     @Override
@@ -44,13 +44,13 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
                           RecyclerView.ViewHolder target) {
         Log.d("adapter", "Move");
-        _adapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        mAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
         return true;
     }
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         Log.d("adapter", "Swipe");
-        _adapter.onItemDismiss(viewHolder.getAdapterPosition());
+        mAdapter.onItemDismiss(viewHolder.getAdapterPosition());
     }
 }

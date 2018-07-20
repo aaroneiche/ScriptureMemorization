@@ -47,23 +47,23 @@ import java.util.Locale;
  */
 
 public class FITBActivity extends AppCompatActivity {
-    private Scripture scripture;
-    private List<word> words;
-    private List<word> hiddenWords;
-    private int percentHidden = 50;
-    private TextView scriptureView;
-    private TableLayout buttons;
+    private Scripture mScripture;
+    private List<word> mWords;
+    private List<word> mHiddenWords;
+    private int mPercentHidden = 50;
+    private TextView mScriptureView;
+    private TableLayout mButtons;
     private final String TAG = "fitb";
-    private int wrongAnswers = 0;
+    private int mWrongAnswers = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fitb);
-        scriptureView = findViewById(R.id.text_scripture);
-        buttons = findViewById(R.id.tl_buttons);
+        mScriptureView = findViewById(R.id.text_scripture);
+        mButtons = findViewById(R.id.tl_buttons);
         Intent intent = getIntent();
-        scripture = intent.getParcelableExtra("Scripture");
+        mScripture = intent.getParcelableExtra("Scripture");
         startMenu();
     }
 
@@ -104,7 +104,7 @@ public class FITBActivity extends AppCompatActivity {
             b.setOnClickListener(new percentClick(i));
             row.addView(b);
         }
-        buttons.addView(row);
+        mButtons.addView(row);
     }
 
     /**
@@ -113,10 +113,10 @@ public class FITBActivity extends AppCompatActivity {
      */
     private void setUpGame() {
         Log.d(TAG, "set up game");
-        buttons.removeAllViews();
-        List<String> text = sfHelper.textToList(scripture.text);
+        mButtons.removeAllViews();
+        List<String> text = sfHelper.textToList(mScripture.text);
         List<Boolean> hiding = new ArrayList<>();
-        for (int i = 0; i <= percentHidden / 10; i++) {
+        for (int i = 0; i <= mPercentHidden / 10; i++) {
             hiding.add(true);
         }
         while (hiding.size() <= 10) {
@@ -124,8 +124,8 @@ public class FITBActivity extends AppCompatActivity {
         }
         Collections.shuffle(hiding);
         int hIndex = 0;
-        words = new ArrayList<>();
-        hiddenWords = new ArrayList<>();
+        mWords = new ArrayList<>();
+        mHiddenWords = new ArrayList<>();
         for (int i = 0; i < text.size(); i++) {
             word w = new word(text.get(i));
             w.hidden = hiding.get(hIndex++);
@@ -134,9 +134,9 @@ public class FITBActivity extends AppCompatActivity {
                 Collections.shuffle(hiding);
             }
             if (w.hidden) {
-                hiddenWords.add(w);
+                mHiddenWords.add(w);
             }
-            words.add(w);
+            mWords.add(w);
         }
         updateScripture();
         updateButtons();
@@ -146,25 +146,25 @@ public class FITBActivity extends AppCompatActivity {
      Finishes everything up
      */
     private void endGame() {
-        scripture.lastReviewed = new Date();
+        mScripture.lastReviewed = new Date();
         //figure out how much of the scripture was put back together correctly
-        double math = (double)(words.size() - wrongAnswers) / words.size() * percentHidden;
+        double math = (double)(mWords.size() - mWrongAnswers) / mWords.size() * mPercentHidden;
         int correct = (int)math;
-        Log.d(TAG, "Words: " + words.size() + " Incorrect: " + wrongAnswers + " Percent: " + correct);
-        if (scripture.percentCorrect < correct) {
-            scripture.percentCorrect = correct;
+        Log.d(TAG, "Words: " + mWords.size() + " Incorrect: " + mWrongAnswers + " Percent: " + correct);
+        if (mScripture.percentCorrect < correct) {
+            mScripture.percentCorrect = correct;
         }
 
         if (correct == 100) {
-            scripture.memorized = true;
-            scripture.dateMemorized = new Date();
-            scriptureView.setText(R.string.fitb_endMessage);
+            mScripture.memorized = true;
+            mScripture.dateMemorized = new Date();
+            mScriptureView.setText(R.string.fitb_endMessage);
         }
 
         else {
-            scriptureView.setText(String.format(Locale.ENGLISH, "Well done, you got %d %%", correct));
+            mScriptureView.setText(String.format(Locale.ENGLISH, "Well done, you got %d %%", correct));
         }
-        buttons.removeAllViews();
+        mButtons.removeAllViews();
         TableRow row = new TableRow(this);
         Button b = new Button(this);
         b.setText("Main Menu");
@@ -175,7 +175,7 @@ public class FITBActivity extends AppCompatActivity {
             }
         });
         row.addView(b);
-        buttons.addView(row);
+        mButtons.addView(row);
     }
 
     /**
@@ -183,7 +183,7 @@ public class FITBActivity extends AppCompatActivity {
      */
     private void exit() {
         Intent intent = new Intent ();
-        intent.putExtra("Scripture", scripture);
+        intent.putExtra("Scripture", mScripture);
         setResult(FITBActivity.RESULT_OK, intent);
         finish();
     }
@@ -195,27 +195,27 @@ public class FITBActivity extends AppCompatActivity {
     private void updateScripture() {
         SpannableStringBuilder builder = new SpannableStringBuilder("");
 
-        for (int i = 0; i < words.size(); i++) {
-            if (words.get(i).hidden) {
+        for (int i = 0; i < mWords.size(); i++) {
+            if (mWords.get(i).hidden) {
                 ForegroundColorSpan black = new ForegroundColorSpan(0xFF000000);
                 int start = builder.length();
                 builder.append("______ ");
                 builder.setSpan(black, start, builder.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
             }
-            else if (words.get(i).correct) {
+            else if (mWords.get(i).correct) {
                 ForegroundColorSpan black = new ForegroundColorSpan(0xFF000000);
                 int start = builder.length();
-                builder.append(words.get(i).word);
+                builder.append(mWords.get(i).word);
                 builder.setSpan(black, start, builder.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
             }
             else {
                 ForegroundColorSpan red = new ForegroundColorSpan(0xFFFF0000);
                 int start = builder.length();
-                builder.append(words.get(i).word);
+                builder.append(mWords.get(i).word);
                 builder.setSpan(red, start, builder.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
             }
         }
-        scriptureView.setText(builder, TextView.BufferType.SPANNABLE);
+        mScriptureView.setText(builder, TextView.BufferType.SPANNABLE);
     }
 
     /**
@@ -226,7 +226,7 @@ public class FITBActivity extends AppCompatActivity {
     private void updateButtons() {
         List<TextView> buttons = new ArrayList<>();
         List<Integer> random = new ArrayList<>();
-        int size = hiddenWords.size();
+        int size = mHiddenWords.size();
 
         if (size == 0) {
             endGame();
@@ -240,14 +240,14 @@ public class FITBActivity extends AppCompatActivity {
 
         for (int i = 0; i < size; i++) {
             Button b = new Button(this);
-            b.setText(hiddenWords.get(i).word);
-            b.setOnClickListener(new wordClick(hiddenWords.get(i).word));
+            b.setText(mHiddenWords.get(i).word);
+            b.setOnClickListener(new wordClick(mHiddenWords.get(i).word));
             buttons.add(b);
             random.add(i);
         }
 
         //put all the buttons in the buttons in a random order
-        this.buttons.removeAllViews();
+        this.mButtons.removeAllViews();
         Collections.shuffle(random);
         int r = 0;
         while (size > 0) {
@@ -259,7 +259,7 @@ public class FITBActivity extends AppCompatActivity {
             for (int i = 0; i < rowSize; i++) {
                 row.addView(buttons.get(random.get(r++)));
             }
-            this.buttons.addView(row);
+            this.mButtons.addView(row);
             size -= rowSize;
         }
     }
@@ -298,15 +298,15 @@ public class FITBActivity extends AppCompatActivity {
         public void onClick(View v) {
             Log.d(TAG, "index: " + word);
 
-            if (word.equals(hiddenWords.get(0).word)) {
-                hiddenWords.get(0).correct = true;
+            if (word.equals(mHiddenWords.get(0).word)) {
+                mHiddenWords.get(0).correct = true;
             }
             else {
-                hiddenWords.get(0).correct = false;
-                wrongAnswers++;
+                mHiddenWords.get(0).correct = false;
+                mWrongAnswers++;
             }
-            hiddenWords.get(0).hidden = false;
-            hiddenWords.remove(0);
+            mHiddenWords.get(0).hidden = false;
+            mHiddenWords.remove(0);
 
             updateScripture();
             updateButtons();
@@ -327,7 +327,7 @@ public class FITBActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Log.d(TAG, "button clicked: " + percent);
-            percentHidden = percent;
+            mPercentHidden = percent;
             setUpGame();
         }
     }
