@@ -33,12 +33,7 @@ public class Scripture implements Parcelable{
         verse = in.readInt();
         verseID = in.readInt();
         text = in.readString();
-        if (in.readInt() == 1) {
-            memorized = true;
-        }
-        else {
-            memorized = false;
-        }
+        memorized = in.readInt() == 1;
         percentCorrect = in.readInt();
         String temp = in.readString();
         if (temp.equals("null")) {
@@ -80,12 +75,12 @@ public class Scripture implements Parcelable{
      * @param verse
      * @param text
      */
-    public Scripture(String volume, String book, int chapter, int verse, String text) {
+    public Scripture(String volume, String book, int chapter, int verse, int verseID, String text) {
         this.volume = volume;
         this.book = book;
         this.chapter = chapter;
         this.verse = verse;
-        this.verseID = 0;
+        this.verseID = verseID;
         this.text = text;
         memorized = false;
         dateMemorized = null;

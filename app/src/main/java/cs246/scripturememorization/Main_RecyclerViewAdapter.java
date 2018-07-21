@@ -1,9 +1,11 @@
 package cs246.scripturememorization;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -19,42 +21,53 @@ import java.util.List;
  */
 
 public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_RecyclerViewAdapter.ViewHolder> implements ItemTouchHelperAdapter {
-    private List<Scripture> _scriptures;
-    private LayoutInflater _inflater;
-    private ItemClickListener _listener;
+    private List<Scripture> mScriptures;
+    private LayoutInflater mInflater;
+    private ItemClickListener mListener;
+    private final OnStartDragListener mDragListenter;
     private static final String TAG = "main_RVA";
 
-    Main_RecyclerViewAdapter(Context context, List<Scripture> scriptures) {
-        _scriptures = scriptures;
-        _inflater = LayoutInflater.from(context);
-
+    Main_RecyclerViewAdapter(Context context, OnStartDragListener dragListener, List<Scripture> scriptures) {
+        mScriptures = scriptures;
+        mDragListenter = dragListener;
+        mInflater = LayoutInflater.from(context);
     }
 
     // inflates the row layout from xml when needed
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = _inflater.inflate(R.layout.main_recyclerview_row, parent, false);
+        View view = mInflater.inflate(R.layout.main_recyclerview_row, parent, false);
         return new ViewHolder(view);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        String reference = sfHelper.getReference(_scriptures.get(position));
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        String reference = sfHelper.getReference(mScriptures.get(position));
         holder.reference.setText(reference);
-        reference = sfHelper.getTextShort(_scriptures.get(position));
-        holder.percent.setText(sfHelper.getPercent(_scriptures.get(position)));
+        reference = sfHelper.getTextShort(mScriptures.get(position));
+        holder.percent.setText(sfHelper.getPercent(mScriptures.get(position)));
         holder.tag.setText(reference);
-        if (_scriptures.get(position).memorized) {
-            holder.check.setImageResource(R.drawable.check_small);;
+        if (mScriptures.get(position).memorized) {
+            holder.check.setImageResource(R.drawable.check_small);
         }
         else {
-            holder.check.setImageResource(R.drawable.box_small);;
+            holder.check.setImageResource(R.drawable.box_small);
         }
+        holder.handle.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    mDragListenter.onStartDrag(holder);
+                }
+                return false;
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return _scriptures.size();
+        return mScriptures.size();
     }
 
     /**
@@ -65,6 +78,7 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
         TextView tag;
         TextView percent;
         ImageView check;
+        ImageView handle;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -73,22 +87,23 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
             percent = itemView.findViewById(R.id.text_percent);
             check = itemView.findViewById(R.id.image_checkBox);
             itemView.setOnClickListener(this);
+            handle = itemView.findViewById(R.id.image_handle);
         }
 
         @Override
         public void onClick(View view) {
-            if (_listener != null) _listener.onItemClick(view, getAdapterPosition());
+            if (mListener != null) mListener.onItemClick(view, getAdapterPosition());
         }
     }
 
     // convenience method for getting data at click position
     Scripture getItem(int id) {
-        return _scriptures.get(id);
+        return mScriptures.get(id);
     }
 
     // allows clicks events to be caught
     void setClickListener(ItemClickListener itemClickListener) {
-       this._listener = itemClickListener;
+       this.mListener = itemClickListener;
     }
 
     // parent activity will implement this method to respond to click events
@@ -108,11 +123,11 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
 
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(_scriptures, i, i + 1);
+                Collections.swap(mScriptures, i, i + 1);
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(_scriptures, i, i - 1);
+                Collections.swap(mScriptures, i, i - 1);
             }
         }
         notifyItemMoved(fromPosition, toPosition);
@@ -125,7 +140,7 @@ public class Main_RecyclerViewAdapter extends RecyclerView.Adapter <Main_Recycle
      */
     @Override
     public void onItemDismiss(int position) {
-        _scriptures.remove(position);
+        mScriptures.remove(position);
         notifyItemRemoved(position);
     }
 }
