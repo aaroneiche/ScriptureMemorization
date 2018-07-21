@@ -17,14 +17,23 @@ import android.database.SQLException;
 import java.util.ArrayList;
 import java.io.IOException;
 
+/* GetVolume is a list activity. It will query the database for all of the volumes in the LDS canon
+including the The Old Testament, The New Testament, The Book of Mormon, Doctrine and Covenants,
+and The Pearl of Great Price. All of those volumes will fill a list that is then used to populate
+the list view. When a volume is clicked, it's value is added to the scripture path to be passed
+by intent and the user is advanced to the next selection phase.
+*/
 
 public class GetVolume extends ListActivity {
+    //immutable strings used to construct the queries
     private static final String TABLE_NAME = "volumes";
     private static final String VOLUME_NAME = "volume_title";
 
+    //the list view and the volumes arraylist
     private ListView listView;
     private ArrayList<String> volumes;
 
+    //connect to the databse
     private DatabaseHelper mDBHelper;
     private SQLiteDatabase mDb;
 
@@ -46,14 +55,18 @@ public class GetVolume extends ListActivity {
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
+        //fill the volumes arraylist and populate the list view with it
         fillVolumes();
         setUpList();
     }
 
+    //Populate the list with the volumes arraylist
     private void setUpList() {
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, volumes));
         listView = getListView();
 
+        /*whe a list view item is clicked, the volume title and volume id are put into the intent
+        and the next activity is started.*/
         listView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position,long id) {
                 Intent intent = new Intent(getApplicationContext(), GetBook.class);
@@ -64,10 +77,10 @@ public class GetVolume extends ListActivity {
         });
     }
 
+    //the database is queried and will return all of the volumes. Each volume will be added.
     private void fillVolumes() {
         volumes = new ArrayList<String>();
-        Cursor volumeCursor = mDb.query(TABLE_NAME,
-                new String[] {VOLUME_NAME},null, null, null, null, "id");
+        Cursor volumeCursor = mDb.query(TABLE_NAME, new String[] {VOLUME_NAME},null, null, null, null, "id");
         volumeCursor.moveToFirst();
         if(!volumeCursor.isAfterLast()) {
             do {
