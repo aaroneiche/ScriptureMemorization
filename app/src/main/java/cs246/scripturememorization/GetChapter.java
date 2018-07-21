@@ -16,7 +16,14 @@ import android.widget.ListView;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/* GetChapter is a list activity. It will query the database for all of the chapters in the previously
+selected book. All of those chapters will fill a list that is then used to populate
+the list view. When a chapter is clicked, it's value is added to the scripture path to be passed
+by intent and the user is advanced to the next selection phase.
+*/
+
 public class GetChapter extends ListActivity {
+    //immutable strings used to construct the queries and normal strings to be defined later for the intent
     private static final String TABLE_NAME = "chapters";
     private static final String BOOK_SELECTOR = "book_id = ";
     private static final String CHAPTER_NUMBER = "chapter_number";
@@ -25,10 +32,12 @@ public class GetChapter extends ListActivity {
     private static int VOLUME_ID;
     private static int BOOK_ID;
 
+    //the list views, the chapters arraylist, the chapterIDs arraylist
     private ListView listView;
     private ArrayList<String> chapters;
     private ArrayList<Integer> chapterIDs;
 
+    //connect to the databse
     private DatabaseHelper mDBHelper;
     private SQLiteDatabase mDb;
 
@@ -57,16 +66,20 @@ public class GetChapter extends ListActivity {
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
+        //fill the chapters arraylist and populate the list view with it. Fill the chapterIDs arraylist too.
         fillChapters();
         fillChapterIDs();
         setUpList();
     }
 
+    //Populate the list with the chapters arraylist
     private void setUpList() {
         setListAdapter(new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, chapters));
         listView = getListView();
 
+        /*when a list view item is clicked, the volume title, volume id, the book id, the book title,
+        the chapter title, and the chapter id are put into the intent and the next activity is started.*/
         listView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
                 Intent intent = new Intent(getApplicationContext(), GetVerse.class);
@@ -81,6 +94,7 @@ public class GetChapter extends ListActivity {
         });
     }
 
+    //the database is queried and will return all of the chapter names (numbers). Each will be added to the arraylist.
     private void fillChapters() {
         chapters = new ArrayList<String>();
         Cursor chapterCursor = mDb.query(TABLE_NAME, new String[] {CHAPTER_NUMBER}, BOOK_SELECTOR + BOOK_ID, null, null, null, "id");
@@ -94,6 +108,7 @@ public class GetChapter extends ListActivity {
         chapterCursor.close();
     }
 
+    //the database is queried and will return all of the book ids. Each will be added to the arraylist.
     private void fillChapterIDs() {
         chapterIDs = new ArrayList<Integer>();
         Cursor chapterIDCursor = mDb.query(TABLE_NAME, new String[] {"id"}, BOOK_SELECTOR + BOOK_ID, null, null, null, "id");
