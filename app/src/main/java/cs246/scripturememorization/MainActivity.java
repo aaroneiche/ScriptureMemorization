@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         updateScriptureView();
     }
 
-    /*
+    /**
     Handles the returned data
      */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -374,6 +374,9 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         saveData();
     }
 
+    /**
+     * saves all the users current data
+     */
     void saveData() {
         mDb.execSQL("CREATE TABLE IF NOT EXISTS user_data (" +
                 "_id INTEGER, verseID INTEGER, lastReviewed TEXT, dateMemorized TEXT, percentCorrect INTEGER, PRIMARY KEY (_id))");
@@ -386,6 +389,9 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         }
     }
 
+    /**
+     * saves a scripture (s) to the database at id (id)
+     */
     void writeScripture(Scripture s, int id) {
         ContentValues values = new ContentValues();
         if (s != null) {
@@ -409,6 +415,9 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         mDb.insert("user_data", null, values);
     }
 
+    /**
+     * retrieve the user's scriptures from the database, called on start up to build current scripture and list.
+     */
     void getScripturesFromDatabase() {
         Cursor userData = mDb.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '"+ "user_data" +"'", null);
         if (userData != null) {
@@ -447,6 +456,11 @@ public class MainActivity extends AppCompatActivity implements Main_RecyclerView
         }
     }
 
+    /**
+     * Pulls a single scripture from the database as referenced by the id
+     * @param id - the id of the verse in the database
+     * @return
+     */
     Scripture getScriptureByID(int id) {
         Cursor scriptureCursor = mDb.rawQuery("SELECT * FROM scriptures WHERE verse_id = " + id, null);
 
