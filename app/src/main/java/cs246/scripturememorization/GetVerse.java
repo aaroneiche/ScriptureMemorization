@@ -102,7 +102,7 @@ public class GetVerse extends ListActivity {
                 VERSE_TEXT = verseTexts.get(position);
                 Log.d("The scripture path is", "" + VOLUME_TITLE + " " + BOOK_TITLE + " " + CHAPTER_TITLE + " " +  VERSE_TITLE + " and the verse ID is " + VERSE_ID + " and the verse text is " + VERSE_TEXT);
 
-                s = new Scripture(VOLUME_TITLE, BOOK_TITLE, CHAPTER_TITLE, VERSE_TITLE, VERSE_TEXT);
+                s = new Scripture(VOLUME_TITLE, BOOK_TITLE, CHAPTER_TITLE, VERSE_TITLE, VERSE_ID, VERSE_TEXT);
 
                 intent.putExtra("Scripture", s);
                 setResult(RESULT_OK, intent);
