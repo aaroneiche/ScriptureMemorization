@@ -108,7 +108,7 @@ public class GetChapter extends ListActivity {
         chapterCursor.close();
     }
 
-    //the database is queried and will return all of the book ids. Each will be added to the arraylist.
+    //the database is queried and will return all of the chapter ids. Each will be added to the arraylist.
     private void fillChapterIDs() {
         chapterIDs = new ArrayList<Integer>();
         Cursor chapterIDCursor = mDb.query(TABLE_NAME, new String[] {"id"}, BOOK_SELECTOR + BOOK_ID, null, null, null, "id");
