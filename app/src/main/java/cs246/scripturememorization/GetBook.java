@@ -30,7 +30,7 @@ public class GetBook extends ListActivity {
     private static final String BOOK_NAME = "book_title";
     private static int VOLUME_ID;
 
-    //the list views, the volumes arraylist, the bookIDs arraylist
+    //the list views, the books arraylist, the bookIDs arraylist
     private ListView listView;
     private ArrayList<String> books;
     private ArrayList<Integer> bookIDs;
