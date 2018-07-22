@@ -16,18 +16,26 @@ import android.widget.ListView;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/* GetBook is a list activity. It will query the database for all of the books in the previously
+selected volume. All of those books will fill a list that is then used to populate
+the list view. When a book is clicked, it's value is added to the scripture path to be passed
+by intent and the user is advanced to the next selection phase.
+*/
 
 public class GetBook extends ListActivity {
+    //immutable strings used to construct the queries and normal strings to be defined later for the intent
     private static final String TABLE_NAME = "books";
     private static final String VOLUME_SELECTOR = "volume_id = ";
     private static String VOLUME_TITLE;
     private static final String BOOK_NAME = "book_title";
     private static int VOLUME_ID;
 
+    //the list views, the books arraylist, the bookIDs arraylist
     private ListView listView;
     private ArrayList<String> books;
     private ArrayList<Integer> bookIDs;
 
+    //connect to the databse
     private DatabaseHelper mDBHelper;
     private SQLiteDatabase mDb;
 
@@ -53,16 +61,20 @@ public class GetBook extends ListActivity {
         } catch (SQLException mSQLException) {
             throw mSQLException;
         }
+        //fill the books arraylist and populate the list view with it. Fill the bookIDs arraylist too.
         fillBooks();
         fillBookIDs();
         setUpList();
     }
 
+    //Populate the list with the books arraylist
     private void setUpList() {
         setListAdapter(new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, books));
         listView = getListView();
 
+        /*when a list view item is clicked, the volume title, volume id, the book id, and the book title
+        are put into the intent and the next activity is started.*/
         listView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
                 Intent intent = new Intent(getApplicationContext(), GetChapter.class);
@@ -75,6 +87,7 @@ public class GetBook extends ListActivity {
         });
     }
 
+    //the database is queried and will return all of the book names. Each will be added to the arraylist.
     private void fillBooks() {
         books = new ArrayList<String>();
         Cursor bookCursor = mDb.query(TABLE_NAME, new String[] {BOOK_NAME},VOLUME_SELECTOR + VOLUME_ID, null, null, null, "id");
@@ -88,6 +101,7 @@ public class GetBook extends ListActivity {
         bookCursor.close();
     }
 
+    //the database is queried and will return all of the book ids. Each will be added to the arraylist.
     private void fillBookIDs() {
         bookIDs = new ArrayList<Integer>();
         Cursor bookIDCursor = mDb.query(TABLE_NAME, new String[] {"id"},VOLUME_SELECTOR + VOLUME_ID, null, null, null, "id");
